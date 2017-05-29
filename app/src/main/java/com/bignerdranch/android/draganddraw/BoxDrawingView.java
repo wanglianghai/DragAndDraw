@@ -4,11 +4,16 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +43,30 @@ public class BoxDrawingView extends View {
 
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setColor(0xfff8efe0);
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("instanceState", super.onSaveInstanceState());
+        Gson gson = new Gson();
+        String jsonList = gson.toJson(mBoxes);
+        bundle.putSerializable("boxArray", jsonList);
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof Bundle) {
+            Bundle bundle = (Bundle) state;
+            String gsonString = (String) bundle.getSerializable("boxArray");
+            Gson gson = new Gson();
+            mBoxes = gson.fromJson(gsonString, new TypeToken<List<Box>>(){}.getType());
+            super.onRestoreInstanceState(bundle.getParcelable("instanceState"));
+            return;
+        }
+
+        super.onRestoreInstanceState(state);
     }
 
     @Override
